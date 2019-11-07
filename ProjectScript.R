@@ -15,13 +15,14 @@ library(ggplot2)
 library(dplyr)
 library(rjson)
 library(RCurl)
+library(circlize)
 
 
-#############################
-### Import, clean data 
-#############################
+#####################################################################
+### Import worldwide trade data for selected counrties then compare totals
+#####################################################################
 
-#Comtrade
+#Comtrade data import
 
 string <- "http://comtrade.un.org/data/cache/partnerAreas.json"
 reporters <- fromJSON(file=string)
@@ -68,7 +69,7 @@ cmtrd$TradeValue <- cmtrd$Trade.Value..US..
 cmtrd <- cmtrd[-c(32)]
 
 
-#CITES
+#CITES data import
 
 cites <- read.csv(text=getURL("https://raw.githubusercontent.com/AngusLMcLean/CITES-Trade-Analysis/master/CITES_2016.csv"), header=T)
 
@@ -81,16 +82,18 @@ cites <- select(cites, -c(Importer.reported.quantity, Exporter.reported.quantity
 is.num <- sapply(cites, is.numeric)
 cites[is.num] <- lapply(cites[is.num], round, 1)
 
-cites$MaxQuant <- apply(cites[,15:16], 1, max)
+cites$MaxQuant <- apply(cites[,17:18], 1, max)
 
-#Compare total exports of listed species and all selected commodities
+###Compare total exports of listed species and all selected commodities
 
+#prepare cites data
 citesexp <- cites %>% select(Exporter, MaxQuant) %>% 
   group_by(Exporter) %>% 
   summarise(Total.1 = sum(MaxQuant)) %>% 
   filter(Exporter %in% c("FR", "DE", "US", "CH", "GB", "IT", "NL", "KR", "JP", "CA"))
 citesexp <- citesexp[order(citesexp$Exporter),]
 
+#prepare comtrade data
 cmtrdexp <- cmtrd %>% filter(Trade.Flow=="Export") %>%
   select(Reporter.ISO, TradeValue) %>%
   group_by(Reporter.ISO) %>%
@@ -99,6 +102,7 @@ vec <- c("CA", "CH", "FR", "IT", "US","DE", "GB", "JP", "KR", "NL")
 cmtrdexp$Exporter <- vec
 cmtrdexp$Reporter.ISO <- NULL
 
+#merge into one dataframe
 allexp <- merge(cmtrdexp, citesexp, by="Exporter")
 allexp <- reshape(allexp, varying=c("Total.1", "Total.2"), direction="long", idvar="Exporter", sep=".")
 allexp$time <- as.character(allexp$time)
@@ -106,6 +110,7 @@ str(allexp)
 allexp$time <- factor(allexp$time, levels = c("1", "2"),
                       labels = c("CITES", "Commodities"))
 
+#make plot
 p <- ggplot(allexp, aes(x=reorder(Exporter, -Total), Total, fill=time, reorder(Exporter, Total)))
 p + geom_col() +
   facet_grid(rows = vars(time), scales = "free") +
@@ -120,7 +125,9 @@ p + geom_col() +
        y="Trade Volume",
        x="Exporter")
 
-#Compare leather, meat, live exports
+###Compare leather, meat, live exports
+
+#prepare cites data
 citesexp1 <- cites %>% select(Exporter, MaxQuant, Term) %>% 
   group_by(Exporter, Term) %>% 
   summarise(Total.1 = sum(MaxQuant)) %>%
@@ -131,6 +138,7 @@ citesexp1$Term <- factor(citesexp1$Term, levels = c("meat", "live", "leather pro
 citesexp1$Commodity <- citesexp1$Term
 citesexp1$Term <- NULL
 
+#prepare comtrade data
 cmtrdexp1 <- cmtrd %>% filter(Trade.Flow=="Export", Commodity.Code %in% c(1:3)) %>%
   select(Reporter.ISO, TradeValue, Commodity.Code) %>%
   group_by(Reporter.ISO, Commodity.Code) %>%
@@ -145,6 +153,7 @@ cmtrdexp1$Reporter.ISO <- NULL
 cmtrdexp1$Commodity <- cmtrdexp1$Commodity.Code
 cmtrdexp1$Commodity.Code <- NULL
 
+#merge into one dataframe
 allexp1 <- merge(cmtrdexp1, citesexp1, by=c("Exporter", "Commodity"))
 allexp1 <- reshape(allexp1, varying=c("Total.2", "Total.1"), direction="long", idvar=c("Exporter","Commodity"), sep=".")
 allexp$time <- as.character(allexp$time)
@@ -152,6 +161,7 @@ str(allexp)
 allexp1$time <- factor(allexp1$time, levels = c("1", "2"),
                        labels = c("CITES", "Commodities"))
 
+#Make plot
 p <- ggplot(allexp1, aes(x=reorder(Exporter, -Total), Total, fill=time, reorder(Exporter, Total)))
 p + geom_col() +
   facet_grid(time ~ Commodity, scales = "free") +
@@ -165,3 +175,33 @@ p + geom_col() +
        subtitle = "All commodities and species for 2016",
        y="Trade Volume",
        x="Exporter")
+
+################################################################################
+#Import data of trades only between selected countries and create chord diagrams
+################################################################################
+
+#CITES shipment-level data between top 10 countries shaped into appropriate format and plotted
+citesbtwn <- cites%>% filter(Exporter %in% c("FR", "DE", "US", "CH", "GB", "IT", "NL", "KR", "JP", "CA"),
+                              Importer %in% c("FR", "DE", "US", "CH", "GB", "IT", "NL", "KR", "JP", "CA")) %>%
+                      select(Exporter, Importer, MaxQuant) %>% 
+                      group_by(Exporter, Importer) %>%
+                      summarise(Total.1 = sum(MaxQuant))
+
+citesbtwn[,3]  <- citesbtwn[,3] / 10000000
+
+chordDiagram(citesbtwn)
+
+
+
+
+
+
+
+
+
+
+
+                              
+
+
+
