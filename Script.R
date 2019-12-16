@@ -161,16 +161,16 @@ dir.create(paste0(getwd(), "/Figures"))
 
 p <- ggplot(allexp, aes(x=reorder(Exporter, -Total), Total, fill=time, reorder(Exporter, Total)))
 
-png(filename=paste0(getwd(), "/Figures/", "Comtrade CITES Totals comparison.png"), width=8, height=5, res=300, units = "in")
+png(filename=paste0(getwd(), "/Figures/", "Comtrade CITES Totals comparison.png"), width=4, height=2.5, res=300, units = "in")
 
 p + geom_col() +
   facet_grid(rows = vars(time), scales = "free") +
   theme_classic() +
   theme(text=element_text(family = "Helvetica"),
         legend.position = "none",
-        axis.title.x = element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        title = element_text(size=14)) +
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        title = element_text(size=12)) +
   labs(title="Total Export Comparison",
        subtitle = "All commodities and species for 2016",
        y="Trade Volume",
@@ -407,13 +407,8 @@ library(igraph)
 visNetwork(nodes, edges) 
 
 #static interactive
-network_static <- visNetwork(nodes, edges) %>% visIgraphLayout(layout = "layout_with_fr") 
-visSave(network_static, file = paste0(getwd(), "/Figures/network_static.html"))
-
-
-
-
-
+network_static <- visNetwork(nodes, edges) %>% visIgraphLayout(layout = "layout_with_fr")
+visSave(network_static, file = paste0(getwd(), "/Figures/network.html"))
 
 
 
