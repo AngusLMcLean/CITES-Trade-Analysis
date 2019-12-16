@@ -19,6 +19,7 @@ library(circlize)
 library(scales)
 library(igraph)
 library(visNetwork)
+library(tibble)
 
 #Set working directory
 setwd("/Users/angus/Documents/Data Science/CITES-Trade-Analysis")
@@ -156,6 +157,8 @@ allexp$time <- factor(allexp$time, levels = c("1", "2"),
                       labels = c("CITES", "Commodities"))
 
 #make plot
+dir.create(paste0(getwd(), "/Figures"))
+
 p <- ggplot(allexp, aes(x=reorder(Exporter, -Total), Total, fill=time, reorder(Exporter, Total)))
 
 png(filename=paste0(getwd(), "/Figures/", "Comtrade CITES Totals comparison.png"), width=8, height=5, res=300, units = "in")
@@ -243,14 +246,11 @@ citeschord <- cites1 %>% filter(Exporter %in% c("FR", "DE", "US", "CN", "GB", "I
 
 citeschord[,3]  <- citeschord[,3] / 10000000 
 
-dir.create(paste0(getwd(), "/Figures"))
-dir.create(paste0(getwd(), "/Figures/ChordDiagrams"))
-
-
 grid.col= c(NL="orange", US="blue", CA="red", IT="green", CN="purple", JP="aquamarine",
             KR="thistle", FR="lightsalmon", DE="yellow", GB="ivory")
 
-png(filename=paste0(getwd(), "/Figures/ChordDiagrams/", "All Trade.png"), width=8, height=5, res=300, units = "in")
+dir.create(paste0(getwd(), "/Figures/ChordDiagrams"))
+png(filename=paste0(getwd(), "/Figures/ChordDiagrams/", "All Trade.png"), width=5, height=5, res=300, units = "in")
 chordDiagram(citeschord, grid.col=grid.col)
 title("All CITES Trade")
 dev.off()
@@ -373,6 +373,7 @@ dev.off()
 # Network analysis of CITES data #
 ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~###
 
+##Any warnings that are returned can be ignored
 #Node list
 exporters <- cites1 %>% distinct(Exporter) %>% rename(label=Exporter)
 importers <- cites1 %>% distinct(Importer) %>% rename(label=Importer)
