@@ -82,7 +82,7 @@ cites <- select(cites, -c(Importer.reported.quantity, Exporter.reported.quantity
 is.num <- sapply(cites, is.numeric)
 cites[is.num] <- lapply(cites[is.num], round, 1)
 
-cites$MaxQuant <- apply(cites[,17:18], 1, max)
+cites$MaxQuant <- apply(cites[,15:16], 1, max)
 
 ###Compare total exports of listed species and all selected commodities
 
