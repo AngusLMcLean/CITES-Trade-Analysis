@@ -161,7 +161,7 @@ dir.create(paste0(getwd(), "/Figures"))
 
 p <- ggplot(allexp, aes(x=reorder(Exporter, -Total), Total, fill=time, reorder(Exporter, Total)))
 
-png(filename=paste0(getwd(), "/Figures/", "Comtrade CITES Totals comparison.png"), width=4, height=2.5, res=300, units = "in")
+png(filename=paste0(getwd(), "/Figures/", "Comtrade CITES Totals comparison.png"), width=8, height=5, res=300, units = "in")
 
 p + geom_col() +
   facet_grid(rows = vars(time), scales = "free") +
