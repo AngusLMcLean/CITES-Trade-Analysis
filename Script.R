@@ -403,11 +403,12 @@ edges
 library(visNetwork)
 library(igraph)
 
-#animated interactive (takes a long time to load)
+#animated interactive (takes a bit of time to load)
 visNetwork(nodes, edges) 
 
 #static interactive
 network_static <- visNetwork(nodes, edges) %>% visIgraphLayout(layout = "layout_with_fr")
+network_static
 visSave(network_static, file = paste0(getwd(), "/Figures/network.html"))
 
 
