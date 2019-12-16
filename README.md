@@ -5,3 +5,5 @@ CITES does not have an API, so the relevant data is stored in this repository. C
 
 This script produces several plots and a network visualization stored in the working directory as an html file. 
 Running the script will save the plots to your working directory. To view the plots without running the script, look in the files folder. The network must be downloaded/cloned first to be viewed. 
+
+Units for CITES trades are converted into Whole Organism Equivalents. 
